@@ -54,9 +54,11 @@ const loginUser = asyncHandler(async(req,res) => {
         },process.env.ACCESS_TOKEN_SECRET,
         {expiresIn: "30m"}
         );
-        res.status(200).json({
+        res.status(200).cookie("accesstoken",accessToken,{
+            httpOnly:true,
+        }).json({
             message:"successfully login",accessToken
-        })
+        });
     }else{
         res.status(401)
         throw new ApiError(401,"All fields are mandotory!")
