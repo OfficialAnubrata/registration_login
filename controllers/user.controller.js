@@ -1,4 +1,3 @@
-const { ApiError } = require("../utils/ApiError.js");
 const asyncHandler = require("express-async-handler");
 const User = require("../models/user.model.js")
 const bcrypt = require("bcrypt")
@@ -6,10 +5,9 @@ const jwt = require("jsonwebtoken")
 
 const registerUser = asyncHandler(async(req,res)=>{
     const {username, email, password} = req.body
-    if(
-        [username,email,password].some((field) => field?.trim()==="")
-){
-        throw new ApiError(400,"All fields are required")
+    if(!username || !email || !password){
+    res.status(400)    
+    throw new Error("All fields are required")
 }
 
 const existedUser = await User.findOne({
@@ -17,7 +15,8 @@ const existedUser = await User.findOne({
 })
 
 if(existedUser){
-    throw new ApiError(409,"user with email or username already exists")
+    res.status(409)
+    throw new Error("user with email or username already exists")
 }
 
 const hashedPassword = await bcrypt.hash(password,10);
@@ -33,14 +32,16 @@ if(user){
         message: "Register the user"
     })
 }else{
-    throw new ApiError(501,"something went wrong while register the user")
+    res.status(509)
+    throw new Error("something went wrong while register the user")
 }
 })
 
 const loginUser = asyncHandler(async(req,res) => {
     const {email,password} = req.body;
     if(!email || !password){
-        throw new ApiError(400,"All fields are mandotory!")
+        res.status(400)
+        throw new Error("All fields are mandotory!")
     }
     const user = await User.findOne({email});
     // compare password with hashedPassword
@@ -61,7 +62,7 @@ const loginUser = asyncHandler(async(req,res) => {
         });
     }else{
         res.status(401)
-        throw new ApiError(401,"All fields are mandotory!")
+        throw new Error("All fields are mandotory!")
     }
 });
 
